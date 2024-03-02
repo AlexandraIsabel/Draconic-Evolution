@@ -22,7 +22,7 @@ import java.util.Locale;
 public class DraconicEvolution {
     public static final String MODID = "draconicevolution";
     public static final String MODNAME = "Draconic Evolution";
-    public static final String VERSION = "${mod_version}";
+    public static final String VERSION = "@mod_version@";
     public static final String MOD_PREFIX = MODID.toLowerCase(Locale.ENGLISH) + ":";
     public static final String PROXY_CLIENT = "com.brandon3055.draconicevolution.client.ClientProxy";
     public static final String PROXY_SERVER = "com.brandon3055.draconicevolution.CommonProxy";

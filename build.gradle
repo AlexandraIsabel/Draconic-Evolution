@@ -1,35 +1,31 @@
-buildscript {
-    repositories {
-        jcenter()
-        maven {
-            name = "forge"
-            url = "http://files.minecraftforge.net/maven"
-        }
-    }
-    dependencies {
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.3-SNAPSHOT'
-    }
+import org.apache.tools.ant.filters.ReplaceTokens
+//apply plugin: 'net.minecraftforge.gradle.forge'
+//apply plugin: 'maven'
+//apply plugin: 'maven-publish'
+
+plugins {
+    id "maven-publish"
+    id "idea"
+    id "net.minecraftforge.gradle" version "5.+"
+    id "wtf.gofancy.fancygradle" version "1.1.+"
 }
-apply plugin: 'net.minecraftforge.gradle.forge'
-apply plugin: 'maven'
-apply plugin: 'maven-publish'
 
 repositories {
 	maven {
         name = "CoFH Maven"
-        url = "http://maven.covers1624.net"
+        url = "https://maven.covers1624.net"
     }
     maven {
         name 'CB Maven'
-        url "http://chickenbones.net/maven/"
+        url "https://chickenbones.net/maven/"
     }
     maven {
         name 'OC Maven'
-        url "http://maven.cil.li/"
+        url "https://maven.cil.li/"
     }
     maven {
         name "JEI Maven."
-        url "http://dvs1.progwml6.com/files/maven"
+        url "https://dvs1.progwml6.com/files/maven"
     }
 }
 
@@ -51,12 +47,37 @@ sourceCompatibility = "1.8"
 targetCompatibility = "1.8"
 
 minecraft {
-    version = config.mc_version + "-" + config.forge_version
+   mappings channel: "snapshot", version: "20171003-1.12"
+    accessTransformer = file("src/main/resources/DraconicEvolution_at.cfg")
+    runs {
+        client {
+            workingDirectory project.file("run")
+
+            // Recommended logging data for a userdev environment
+            property "forge.logging.markers", "SCAN,REGISTRIES,REGISTRYDUMP"
+
+            // Recommended logging level for the console
+            property "forge.logging.console.level", "info"
+        }
+
+        server {
+
+            // Recommended logging data for a userdev environment
+            property "forge.logging.markers", "SCAN,REGISTRIES,REGISTRYDUMP"
+
+            // Recommended logging level for the console
+            property "forge.logging.console.level", "info"
+        }
+    }
+    //makeObfSourceJar = false
+    //replace '${mod_version}', project.config.mod_version
+    //replaceIn "DraconicEvolution.java"
+    /* version = config.mc_version + "-" + config.forge_version
     runDir = "run"
     mappings = "${config.mappings}"
     replace '${mod_version}', project.config.mod_version
     replaceIn "DraconicEvolution.java"
-    makeObfSourceJar = false
+    makeObfSourceJar = false*/
 }
 
 String buildNo = "193"
@@ -64,28 +85,35 @@ if (System.getenv("BUILD_NUMBER") != null) {
     buildNo = System.getenv("BUILD_NUMBER")
 }
 version = version + ".${buildNo}"
-
+sourceSets {
+    api {
+        java {
+        }
+    }
+}
 dependencies {
-    compile "com.brandon3055.brandonscore:BrandonsCore:${config.mc_version}-${config.bcore_version}:deobf"
-    compile "com.brandon3055.projectintelligence:ProjectIntelligence:${config.mc_version}-${config.pi_version}:deobf"
-    compile "codechicken:CodeChickenLib:${config.mc_version}-${config.ccl_version}:deobf"
-    compile "li.cil.oc:OpenComputers:${config.oc_version}:api"
-    compile "mezz.jei:jei_${config.mc_version}:${config.jei_version}"
-	compile "cofh:RedstoneFlux:${config.rf_mc_version}-${config.rf_version}:deobf"
+    minecraft("net.minecraftforge:forge:1.12.2-14.23.5.2860")
+    apiImplementation("net.minecraftforge:forge:1.12.2-14.23.5.2860_mapped_snapshot_20171003-1.12_at_da284b422f0f3571f88e0d6ad151880ca95d6064")
+    implementation(sourceSets.api.output)
+    implementation "com.brandon3055.brandonscore:BrandonsCore:${config.mc_version}-${config.bcore_version}:deobf"
+    implementation "com.brandon3055.projectintelligence:ProjectIntelligence:${config.mc_version}-${config.pi_version}:deobf"
+    implementation "codechicken:CodeChickenLib:${config.mc_version}-${config.ccl_version}:deobf"
+    implementation "li.cil.oc:OpenComputers:${config.oc_version}:api"
+    implementation "mezz.jei:jei_${config.mc_version}:${config.jei_version}"
+	implementation "cofh:RedstoneFlux:${config.rf_mc_version}-${config.rf_version}:deobf"
 }
 
 processResources
         {
             // this will ensure that this task is redone when the versions change.
             inputs.property "version", project.version
-            inputs.property "mc_version", project.minecraft.version
+            inputs.property "mc_version", config.mc_version
 
             // replace stuff in mcmod.info, nothing else
             from(sourceSets.main.resources.srcDirs) {
                 include 'mcmod.info'
-
                 // replace version and mc_version
-                expand 'version': project.version, 'mc_version': project.minecraft.version
+                expand 'version': project.version, 'mc_version': config.mc_version, 'mod_version': config.mod_version
             }
 
             // copy everything else, thats not the mcmod.info
@@ -93,16 +121,30 @@ processResources
                 exclude 'mcmod.info'
             }
             rename '(.+_at.cfg)', 'META-INF/$1'
+            duplicatesStrategy = 'include'
         }
+task replaceTokens(type: Sync) {
+    // replace @TOKENS@ in main file
+    from sourceSets.main.java
+    inputs.property 'version', project.version
+    inputs.property "mc_version", config.mc_version
+    filter(ReplaceTokens, tokens: [mod_version: config.mod_version.toString()])
+    into "$buildDir/src"
+}
+
+compileJava {
+    dependsOn "replaceTokens"
+    source = replaceTokens.outputs
+}
 
 def commonManifest = {
     attributes 'FMLAT': 'DraconicEvolution_at.cfg'
 }
 
-
 jar {
     classifier = 'universal'
     manifest commonManifest
+    //finalizedBy reobfJar
 }
 
 task srcJar(type: Jar) {
@@ -121,7 +163,7 @@ artifacts {
     archives srcJar, deobfJar
 }
 
-uploadArchives {
+/*uploadArchives {
     repositories {
         mavenDeployer {
             if (project.hasProperty("local_maven") || project.hasProperty("maven_pass")) {
@@ -171,5 +213,12 @@ uploadArchives {
                 }
             }
         }
+    }
+}*/
+fancyGradle {
+    patches {
+        resources
+        coremods
+        asm
     }
 }
