@@ -54,7 +54,7 @@ public final class SupportCode {
         try {
             Method method = component.getClass().getMethod("setDisplayedMnemonicIndex", new Class[]{Integer.TYPE});
             method.setAccessible(true);
-            method.invoke(component, new Object[]{new Integer(index)});
+            method.invoke(component, new Object[]{index});
         }
         catch (Exception localException) {
         }

@@ -89,7 +89,7 @@ public final class Util {
             }
             if ((!starts) || (!ends)) {
                 if (elimitated != null) {
-                    elimitated.add(new Integer(cell));
+                    elimitated.add(cell);
                 }
                 for (int i = 0; i < size; i++) {
                     boolean decreaseSpan = (cellIndices[i] <= cell) && (cell < cellIndices[i] + spans[i]);

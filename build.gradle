@@ -27,6 +27,14 @@ repositories {
         name "JEI Maven."
         url "https://dvs1.progwml6.com/files/maven"
     }
+    maven {
+        name "Alexandra's Maven for ModRealms Plugins"
+        url "https://maven.alexandraisabel.me/repository/MR/"
+    }
+    maven {
+        name "Sponge Maven"
+        url "https://repo.spongepowered.org/maven/"
+    }
 }
 
 // Define properties file
@@ -101,6 +109,8 @@ dependencies {
     implementation "li.cil.oc:OpenComputers:${config.oc_version}:api"
     implementation "mezz.jei:jei_${config.mc_version}:${config.jei_version}"
 	implementation "cofh:RedstoneFlux:${config.rf_mc_version}-${config.rf_version}:deobf"
+    implementation "net.modrealms.worlds.sponge:Worlds:1.0.0-SNAPSHOT:sponge"
+    implementation "org.spongepowered:spongeapi:7.2.0-SNAPSHOT"
 }
 
 processResources
