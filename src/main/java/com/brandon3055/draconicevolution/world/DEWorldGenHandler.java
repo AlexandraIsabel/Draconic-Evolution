@@ -67,7 +67,6 @@ public class DEWorldGenHandler implements IWorldGenerator {
         }
         switch (dimensionNumericId) {
             case 0:
-                System.out.println("Dimension is: " + world.getWorldInfo().getWorldName());
                 if (!DEConfig.disableOreSpawnOverworld) {
                     addOreSpawn(DEFeatures.draconiumOre.getDefaultState().withProperty(DraconiumOre.ORE_TYPE, DraconiumOre.EnumType.NORMAL), Blocks.STONE.getDefaultState(), world, random, chunkX * 16, chunkZ * 16, 6, 10, 2, 2, 8);
                 }
